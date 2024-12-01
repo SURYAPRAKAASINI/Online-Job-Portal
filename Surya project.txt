@@ -1,0 +1,281 @@
+package com.jobportal;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.util.ArrayList;
+
+// Main Class
+public class JobPortalMain {
+    public static void main(String[] args) {
+        new LoginPage();
+    }
+}
+
+// User Model
+class User {
+    String username, password, name, email;
+
+    public User(String username, String password) {
+        this.username = username;
+        this.password = password;
+    }
+}
+
+// Job Model
+class Job {
+    String title, company, description;
+
+    public Job(String title, String company, String description) {
+        this.title = title;
+        this.company = company;
+        this.description = description;
+    }
+}
+
+// Login Page
+class LoginPage extends JFrame {
+    static ArrayList<User> users = new ArrayList<>();
+    static ArrayList<Job> jobs = new ArrayList<>();
+
+    JTextField usernameField;
+    JPasswordField passwordField;
+
+    public LoginPage() {
+        initializeJobs();
+
+        setTitle("Job Portal - Login");
+        setSize(400, 300);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+
+        JPanel panel = new JPanel(new GridLayout(3, 2, 10, 10));
+
+        JLabel userLabel = new JLabel("Username:");
+        usernameField = new JTextField();
+        JLabel passLabel = new JLabel("Password:");
+        passwordField = new JPasswordField();
+
+        JButton loginButton = new JButton("Login");
+        JButton registerButton = new JButton("Register");
+
+        loginButton.addActionListener(e -> login());
+        registerButton.addActionListener(e -> register());
+
+        panel.add(userLabel);
+        panel.add(usernameField);
+        panel.add(passLabel);
+        panel.add(passwordField);
+        panel.add(loginButton);
+        panel.add(registerButton);
+
+        add(panel);
+        setVisible(true);
+    }
+
+    private void login() {
+        String username = usernameField.getText();
+        String password = new String(passwordField.getPassword());
+
+        for (User user : users) {
+            if (user.username.equals(username) && user.password.equals(password)) {
+                JOptionPane.showMessageDialog(this, "Login successful!");
+                new PersonalDetailsPage(user);
+                dispose();
+                return;
+            }
+        }
+
+        JOptionPane.showMessageDialog(this, "Invalid credentials!");
+    }
+
+    private void register() {
+        String username = usernameField.getText();
+        String password = new String(passwordField.getPassword());
+
+        for (User user : users) {
+            if (user.username.equals(username)) {
+                JOptionPane.showMessageDialog(this, "Username already exists!");
+                return;
+            }
+        }
+
+        users.add(new User(username, password));
+        JOptionPane.showMessageDialog(this, "Registration successful! Please log in.");
+    }
+
+    private void initializeJobs() {
+        jobs.add(new Job("Software Engineer", "TechCorp", "Develop and maintain software solutions."));
+        jobs.add(new Job("Data Analyst", "DataInsights", "Analyze and interpret complex data sets."));
+        jobs.add(new Job("Project Manager", "BuildSmart", "Plan and oversee projects to ensure timely delivery."));
+        jobs.add(new Job("UI/UX Designer", "CreativeLab", "Design intuitive and user-friendly interfaces."));
+        jobs.add(new Job("System Administrator", "SecureSys", "Maintain and secure IT infrastructure."));
+        jobs.add(new Job("DevOps Engineer", "CloudOps", "Streamline development and operations workflows."));
+        jobs.add(new Job("Cybersecurity Analyst", "ShieldTech", "Protect systems from cyber threats and vulnerabilities."));
+        jobs.add(new Job("AI Specialist", "InnovateAI", "Develop and deploy AI-driven applications."));
+        jobs.add(new Job("Marketing Manager", "AdVantage", "Lead and execute marketing campaigns to increase brand awareness."));
+        jobs.add(new Job("Content Writer", "WordCraft", "Create engaging and high-quality written content."));
+        jobs.add(new Job("Full-Stack Developer", "CodeFusion", "Design and implement both front-end and back-end systems."));
+    }
+}
+
+// Personal Details Page
+class PersonalDetailsPage extends JFrame {
+    JTextField nameField, emailField;
+    User user;
+
+    public PersonalDetailsPage(User user) {
+        this.user = user;
+
+        setTitle("Job Portal - Personal Details");
+        setSize(400, 300);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+
+        JPanel panel = new JPanel(new GridLayout(3, 2, 10, 10));
+
+        JLabel nameLabel = new JLabel("Name:");
+        nameField = new JTextField();
+        JLabel emailLabel = new JLabel("Email:");
+        emailField = new JTextField();
+
+        JButton saveButton = new JButton("Save and Continue");
+        saveButton.addActionListener(e -> saveDetails());
+
+        panel.add(nameLabel);
+        panel.add(nameField);
+        panel.add(emailLabel);
+        panel.add(emailField);
+        panel.add(saveButton);
+
+        add(panel);
+        setVisible(true);
+    }
+
+    private void saveDetails() {
+        user.name = nameField.getText();
+        user.email = emailField.getText();
+
+        if (user.name.isEmpty() || user.email.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "All fields are required!");
+        } else {
+            JOptionPane.showMessageDialog(this, "Details saved!");
+            new FindJobPage(user);
+            dispose();
+        }
+    }
+}
+
+// Find Job Page
+class FindJobPage extends JFrame {
+    User user;
+
+    public FindJobPage(User user) {
+        this.user = user;
+
+        setTitle("Job Portal - Find Jobs");
+        setSize(500, 500);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+
+        JPanel panel = new JPanel(new BorderLayout());
+
+        JLabel heading = new JLabel("Available Jobs", JLabel.CENTER);
+        heading.setFont(new Font("Arial", Font.BOLD, 20));
+        panel.add(heading, BorderLayout.NORTH);
+
+        // Display job details in a scrollable text area
+        JTextArea jobArea = new JTextArea();
+        jobArea.setEditable(false);
+        for (Job job : LoginPage.jobs) {
+            jobArea.append("Title: " + job.title + "\n");
+            jobArea.append("Company: " + job.company + "\n");
+            jobArea.append("Description: " + job.description + "\n");
+            jobArea.append("--------------------------------------\n");
+        }
+
+        JScrollPane scrollPane = new JScrollPane(jobArea);
+        panel.add(scrollPane, BorderLayout.CENTER);
+
+        JButton applyButton = new JButton("Apply for a Job");
+        applyButton.addActionListener(e -> {
+            String selectedJobTitle = JOptionPane.showInputDialog(
+                this,
+                "Enter the title of the job you want to apply for:",
+                "Apply for Job",
+                JOptionPane.QUESTION_MESSAGE
+            );
+
+            Job selectedJob = LoginPage.jobs.stream()
+                .filter(job -> job.title.equalsIgnoreCase(selectedJobTitle))
+                .findFirst()
+                .orElse(null);
+
+            if (selectedJob != null) {
+                new ApplicationPage(selectedJob, user);
+                dispose();
+            } else {
+                JOptionPane.showMessageDialog(this, "Job not found. Please enter a valid job title.");
+            }
+        });
+
+        panel.add(applyButton, BorderLayout.SOUTH);
+
+        add(panel);
+        setVisible(true);
+    }
+}
+
+// Application Page
+class ApplicationPage extends JFrame {
+    public ApplicationPage(Job job, User user) {
+        setTitle("Job Portal - Application");
+        setSize(400, 300);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+
+        JPanel panel = new JPanel(new GridLayout(4, 1, 10, 10));
+
+        JLabel jobLabel = new JLabel("Applying for: " + job.title + " at " + job.company);
+        JLabel nameLabel = new JLabel("Applicant: " + user.name);
+        JLabel emailLabel = new JLabel("Email: " + user.email);
+
+        JButton submitButton = new JButton("Submit Application");
+        submitButton.addActionListener(e -> {
+            JOptionPane.showMessageDialog(this, "Application submitted!");
+            new LogoutPage();
+            dispose();
+        });
+
+        panel.add(jobLabel);
+        panel.add(nameLabel);
+        panel.add(emailLabel);
+        panel.add(submitButton);
+
+        add(panel);
+        setVisible(true);
+    }
+}
+
+// Logout Page
+class LogoutPage extends JFrame {
+    public LogoutPage() {
+        setTitle("Job Portal - Logout");
+        setSize(400, 200);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+
+        JPanel panel = new JPanel(new BorderLayout());
+
+        JLabel message = new JLabel("You have successfully submitted.", JLabel.CENTER);
+        message.setFont(new Font("Arial", Font.BOLD, 16));
+        panel.add(message, BorderLayout.CENTER);
+
+        JButton closeButton = new JButton("Close");
+        closeButton.addActionListener(e -> System.exit(0));
+        panel.add(closeButton, BorderLayout.SOUTH);
+
+        add(panel);
+        setVisible(true);
+    }
+}
